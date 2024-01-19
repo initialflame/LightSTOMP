@@ -14,6 +14,7 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 
 /**
  * Implements a simple STOMP over Websocket
@@ -102,6 +103,19 @@ public class StompWebSocket implements IStompSocket {
             try {
                 //session.getBasicRemote().sendBinary(frame.toByteBuffer());
                 session.getBasicRemote().sendText(frame.toString());
+            } catch (IOException e) {
+                LOG.error("Failed to send STOMP Frame!", e);
+            }
+        }
+    }
+    
+    @Override
+    public void sendPong() {
+    	Session session = webSession;
+        if(session != null && session.isOpen()){
+            try {
+                //session.getBasicRemote().sendBinary(frame.toByteBuffer());
+                session.getBasicRemote().sendPong(ByteBuffer.wrap("".getBytes()));
             } catch (IOException e) {
                 LOG.error("Failed to send STOMP Frame!", e);
             }
