@@ -30,4 +30,9 @@ public interface IStompSocket {
      */
     String getHost();
 
+    /**
+     * sends a Pong to Server as a Heartbeat-Signal
+     */
+	void sendPong();
+    
 }

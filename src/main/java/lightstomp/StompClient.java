@@ -116,6 +116,13 @@ public class StompClient {
                 .withBody(message);
         sendStompFrame(request);
     }
+    
+    /**
+     * Sends a Pong to the Server as a Heartbeatsignal to keep the Connection open
+     */
+    public void stompSendHeartBeat() {
+    	socket.sendPong();
+    }
 
     /**
      * Subscribe to the given channel.
