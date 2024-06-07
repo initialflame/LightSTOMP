@@ -5,13 +5,13 @@
 
     <groupId>light-stomp</groupId>
     <artifactId>light-stomp-client</artifactId>
-    <version>0.2.0</version>
+    <version>0.4.0</version>
     <packaging>jar</packaging>
     <name>LightSTOMP</name>
     <description>A lightweight STOMP Client for Java supporting WebSockets</description>
 
 	<properties>
-		<tyrus.version>1.19</tyrus.version>
+		<tyrus.version>1.21</tyrus.version>
 		
 	</properties>
 
