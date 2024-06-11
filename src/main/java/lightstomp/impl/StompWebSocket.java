@@ -13,8 +13,10 @@ import org.slf4j.LoggerFactory;
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implements a simple STOMP over Websocket
@@ -47,7 +49,9 @@ public class StompWebSocket implements IStompSocket {
         try {
 
             client.connectToServer(new Endpoint() {
-                @Override
+                private ScheduledExecutorService heartbeatScheduler;
+
+				@Override
                 public void onOpen(Session session, EndpointConfig config) {
                     webSession = session;
                     session.addMessageHandler(new MessageHandler.Whole<byte[]>(){ // WARNING: DO NOT USE LAMBDA HERE!
@@ -65,11 +69,30 @@ public class StompWebSocket implements IStompSocket {
                     });
 
                     listener.connected();
+                    
+                    if(heartbeatScheduler != null) {
+                    	heartbeatScheduler.shutdownNow();
+                    }
+
+                    heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
+                    heartbeatScheduler.scheduleAtFixedRate(() -> {
+                        try {
+                        	if(LOG.isDebugEnabled()) {
+                        		LOG.debug("Send Heartbeat");
+                        	}
+                            session.getBasicRemote().sendText("PING");  // Sendet ein PING als Heartbeat
+                        } catch (Exception e) {
+                            LOG.warn("Heartbeat cannot be sent {}", e.getMessage());
+                        }
+                    }, 40, 40, TimeUnit.SECONDS);
 
                 }
 
                 public void onClose(javax.websocket.Session session, javax.websocket.CloseReason closeReason) {
                     listener.closed(closeReason.getCloseCode() +": "+ closeReason.getReasonPhrase());
+                    if(heartbeatScheduler != null) {
+                    	heartbeatScheduler.shutdownNow();
+                    }
                 }
 
                 public void onError(javax.websocket.Session session, java.lang.Throwable thr) {
